@@ -1,0 +1,33 @@
+# JorahOne AI Stack — reverse proxy
+# Bind these hostnames to your Tailscale machine name / MagicDNS,
+# or replace with your own Tailscale hostname (run `tailscale status` to confirm).
+# TLS is handled by Tailscale itself (tailscale cert) if you front with HTTPS;
+# left as plain HTTP here since traffic never leaves the tailnet.
+
+:3000 {
+	reverse_proxy open-webui:8080
+}
+
+:4000 {
+	reverse_proxy litellm:4000
+}
+
+:8000 {
+	reverse_proxy honcho-api:8000
+}
+
+:8081 {
+	reverse_proxy llama-server:8080
+}
+
+:8888 {
+	reverse_proxy searxng:8080
+}
+
+:8090 {
+	reverse_proxy costforge:8000
+}
+
+:6333 {
+	reverse_proxy qdrant:6333
+}

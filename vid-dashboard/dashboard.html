@@ -1,0 +1,134 @@
+{%- raw %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VIDE IT ai - Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f8fafc; }
+        .header { background: __HEADER_GRADIENT__; color: white; padding: 20px; }
+        .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: __TITLE_SIZE__; }
+        .stats { background: white; border-bottom: 1px solid #e2e8f0; padding: 16px 0; }
+        .stats-content { max-width: 1400px; margin: 0 auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+        .stat { text-align: center; }
+        .stat-label { font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 600; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #1e293b; margin-top: 4px; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 24px 20px; display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .card h2 { font-size: 16px; color: #1e293b; margin-bottom: 14px; }
+        .upload-zone { border: 2px dashed #cbd5e1; border-radius: 10px; padding: 24px; text-align: center; background: #fafafa; cursor: pointer; transition: all 0.2s; }
+        .upload-zone:hover { border-color: #4f46e5; background: #f5f3ff; }
+        .btn { background: #4f46e5; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        .btn:hover { background: #4338ca; }
+        .btn-secondary { background: white; color: #475569; border: 1px solid #e2e8f0; }
+        .btn-secondary:hover { background: #f8fafc; }
+        .btn-danger { background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-sm { padding: 4px 10px; font-size: 12px; }
+        input, textarea, select { width: 100%; padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; margin: 6px 0; }
+        textarea { min-height: 90px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+        .chat-window { background: #f8fafc; border-radius: 10px; padding: 12px; min-height: 280px; max-height: 420px; overflow-y: auto; border: 1px solid #e2e8f0; }
+        .chat-bubble { max-width: 85%; padding: 10px 14px; border-radius: 14px; margin: 8px 0; font-size: 13px; line-height: 1.5; }
+        .chat-bubble.user { background: #4f46e5; color: white; margin-left: auto; border-bottom-right-radius: 4px; }
+        .chat-bubble.assistant { background: white; border: 1px solid #e2e8f0; margin-right: auto; border-bottom-left-radius: 4px; }
+        .msg { padding: 10px 12px; border-radius: 8px; margin: 8px 0; font-size: 13px; }
+        .msg.success { background: #dcfce7; color: #166534; }
+        .msg.error { background: #fee2e2; color: #991b1b; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #f8fafc; font-weight: 600; color: #475569; font-size: 12px; text-transform: uppercase; padding: 10px; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1>VIDE IT ai</h1>
+                <p>RAG backend serving at :8123</p>
+            </div>
+            <div>
+                <a href="/logout" class="btn btn-secondary">Sign out</a>
+            </div>
+        </div>
+    </div>
+    <div class="stats">
+        <div class="stats-content">
+            <div class="stat">
+                <div class="stat-label">Status</div>
+                <div class="stat-value">Ready</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Model</div>
+                <div class="stat-value">vide-ai</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Indexed docs</div>
+                <div class="stat-value" id="docCount">-</div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="left">
+            <div class="card">
+                <h2>Upload documents</h2>
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <input type="file" name="files" id="fileInput" multiple>
+                    <button type="submit" class="btn" style="margin-top:10px;">Upload</button>
+                </form>
+                <div id="uploadMsg"></div>
+                <h2 style="margin-top:18px;">Documents</h2>
+                <div id="docsTable"></div>
+            </div>
+        </div>
+        <div class="right">
+            <div class="card">
+                <h2>Chat</h2>
+                <div class="chat-window" id="chat">
+                    <div class="chat-bubble system">Logged in as <span id="loginUser">user</span></div>
+                </div>
+                <form id="chatForm" style="margin-top:10px;">
+                    <textarea name="question" placeholder="Ask something..." required></textarea>
+                    <button type="submit" class="btn" style="margin-top:8px;">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        async function loadDocs() {
+            const r = await fetch('/docs');
+            const data = await r.json();
+            document.getElementById('docCount').textContent = data.total || data.docs.length;
+            const rows = data.docs.map(d => '<tr><td>' + d.name + '</td><td>' + d.size + '</td><td>' + d.uploaded_at + '</td><td><button class="btn btn-danger btn-sm" data-id="' + d.id + '">Delete</button></td></tr>').join('');
+            document.getElementById('docsTable').innerHTML = rows ? '<table><thead><tr><th>Name</th><th>Size</th><th>Uploaded</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>' : '<p>No documents yet.</p>';
+            document.querySelectorAll('#docsTable .btn-danger').forEach(b => b.onclick = async () => {
+                await fetch('/docs/' + b.dataset.id, {method:'DELETE'});
+                loadDocs();
+            });
+        }
+        document.getElementById('uploadForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const fd = new FormData();
+            document.getElementById('fileInput').files.forEach(f => fd.append('files', f));
+            const r = await fetch('/upload', {method:'POST', body: fd});
+            const j = await r.json();
+            document.getElementById('uploadMsg').innerHTML = '<div class="msg ' + (j.status === 'ok' ? 'success' : 'error') + '">' + (j.detail || j.status) + '</div>';
+            loadDocs();
+        };
+        document.getElementById('chatForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const q = new FormData(e.target).get('question');
+            const chat = document.getElementById('chat');
+            chat.innerHTML += '<div class="chat-bubble user">' + q + '</div>';
+            const r = await fetch('/chat', {method:'POST', body: JSON.stringify({question:q, top_k:4}), headers: {'Content-Type':'application/json'}});
+            const j = await r.json();
+            chat.innerHTML += '<div class="chat-bubble assistant">' + j.answer + '</div>';
+            chat.scrollTop = chat.scrollHeight;
+            e.target.reset();
+        };
+        loadDocs();
+    </script>
+</body>
+</html>
+{%- endraw %}"

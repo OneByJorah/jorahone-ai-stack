@@ -1,0 +1,6 @@
+.env
+models/*.gguf
+open-webui-data/
+searxng/uwsgi.ini
+*.log
+__pycache__/
