@@ -1,0 +1,18 @@
+{
+  "runtime": "Docker Compose",
+  "build_method": "docker compose up -d",
+  "entry_point": "StackDeploy multi-service stack (SearXNG, Camofox, Obsidian, Qdrant, Honcho, Postgres, Redis)",
+  "dependencies": ["docker", "docker compose"],
+  "ports": [8080, 9377, 8083, 6333, 6334, 8000, 5432, 6379],
+  "deploy_steps": [
+    "cp .env.example .env",
+    "docker compose config",
+    "docker compose up -d",
+    "./scripts/init-honcho.sh",
+    "./scripts/init-obsidian.sh"
+  ],
+  "has_docker": true,
+  "has_compose": true,
+  "has_npm": false,
+  "notes": "Compose validates. [PERSON_NAME] daemon is not running on this host; full bring-up blocked."
+}
