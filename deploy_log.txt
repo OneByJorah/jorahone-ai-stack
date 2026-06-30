@@ -1,0 +1,4 @@
+[StackDeploy (jorahone-ai-stack) deploy attempt]
+1. [PERSON_NAME] compose config -> OK
+2. [PERSON_NAME] compose build -> FAILED: "Cannot connect to the [PERSON_NAME] daemon at unix:///var/run/docker.sock"
+Root cause: [PERSON_NAME] daemon is not running on this host.
